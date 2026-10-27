@@ -1,17 +1,22 @@
-<?php
+import axios from 'axios';
 
-use Illuminate\Http\Request;
-use Illuminate\Support\Facades\Route;
-
-Route::get('/user', function (Request $request) {
-    return $request->user();
-})->middleware('auth:sanctum');
-
-Route::get('/health', function () {
-    return response()->json([
-        'status' => 'ok',
-        'service' => 'TaskFlow Pro API',
-        'author' => 'niga-star',
-        'timestamp' => now()->toIso8601String(),
-    ]);
+const api = axios.create({
+  baseURL: '/api',
+  headers: {
+    Accept: 'application/json',
+    'Content-Type': 'application/json',
+  },
+  withCredentials: true,
 });
+
+api.interceptors.request.use((config) => {
+  const token = localStorage.getItem('tfp_token');
+
+  if (token) {
+    config.headers.Authorization = `Bearer ${token}`;
+  }
+
+  return config;
+});
+
+export default api;
