@@ -1,22 +1,25 @@
-import axios from 'axios';
+<?php
 
-const api = axios.create({
-  baseURL: '/api',
-  headers: {
-    Accept: 'application/json',
-    'Content-Type': 'application/json',
-  },
-  withCredentials: true,
+use App\Http\Controllers\Api\AuthController;
+use Illuminate\Support\Facades\Route;
+
+// Health check
+Route::get('/health', function () {
+    return response()->json([
+        'status' => 'ok',
+        'service' => 'TaskFlow Pro API',
+        'author' => 'niga-star',
+        'timestamp' => now()->toIso8601String(),
+    ]);
 });
 
-api.interceptors.request.use((config) => {
-  const token = localStorage.getItem('tfp_token');
+// Authentication routes
+Route::prefix('auth')->group(function () {
+    Route::post('/register', [AuthController::class, 'register']);
+    Route::post('/login', [AuthController::class, 'login']);
 
-  if (token) {
-    config.headers.Authorization = `Bearer ${token}`;
-  }
-
-  return config;
+    Route::middleware('auth:sanctum')->group(function () {
+        Route::get('/me', [AuthController::class, 'me']);
+        Route::post('/logout', [AuthController::class, 'logout']);
+    });
 });
-
-export default api;
